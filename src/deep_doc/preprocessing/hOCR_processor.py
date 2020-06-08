@@ -202,30 +202,18 @@ def convert_examples_to_features(
         if pad_on_left:
             input_ids = ([pad_token_id] * padding_length) + input_ids
             bboxes = ([[0, 0, 0, 0]] * padding_length) + bboxes
-            attention_mask = (
-                [0 if mask_padding_with_zero else 1] * padding_length
-            ) + attention_mask
+            attention_mask = ([0 if mask_padding_with_zero else 1] * padding_length) + attention_mask
             token_type_ids = ([pad_token_segment_id] * padding_length) + token_type_ids
         else:
             input_ids = input_ids + ([pad_token_id] * padding_length)
             bboxes = bboxes + ([[0, 0, 0, 0]] * padding_length)
-            attention_mask = attention_mask + (
-                [0 if mask_padding_with_zero else 1] * padding_length
-            )
+            attention_mask = attention_mask + ([0 if mask_padding_with_zero else 1] * padding_length)
             token_type_ids = token_type_ids + ([pad_token_segment_id] * padding_length)
 
-        assert len(input_ids) == max_length, "Error with input length {} vs {}".format(
-            len(input_ids), max_length
-        )
-        assert len(bboxes) == max_length, "Error with input length {} vs {}".format(
-            len(bboxes), max_length
-        )
-        assert (
-            len(attention_mask) == max_length
-        ), "Error with input length {} vs {}".format(len(attention_mask), max_length)
-        assert (
-            len(token_type_ids) == max_length
-        ), "Error with input length {} vs {}".format(len(token_type_ids), max_length)
+        assert len(input_ids) == max_length, "Error with input length {} vs {}".format(len(input_ids), max_length)
+        assert len(bboxes) == max_length, "Error with input length {} vs {}".format(len(bboxes), max_length)
+        assert (len(attention_mask) == max_length), "Error with input length {} vs {}".format(len(attention_mask), max_length)
+        assert (len(token_type_ids) == max_length), "Error with input length {} vs {}".format(len(token_type_ids), max_length)
 
         label = label_map[example.label]
 
@@ -255,58 +243,32 @@ def convert_examples_to_features(
 
 
 def load_and_cache_examples(args, tokenizer, mode="train"):
-    if args.local_rank not in [-1, 0] and mode == "train":
-        torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
-
     processor = CdipProcessor()
     # Load data features from cache or dataset file
-    cached_features_file = os.path.join(
-        args.data_dir,
-        "cached_{}_{}_{}".format(
-            mode,
-            list(filter(None, args.model_name_or_path.split("/"))).pop(),
-            str(args.max_seq_length),
-        ),
-    )
-    if os.path.exists(cached_features_file) and not args.overwrite_cache:
-        logger.info("Loading features from cached file %s", cached_features_file)
-        features = torch.load(cached_features_file)
-    else:
-        logger.info("Creating features from dataset file at %s", args.data_dir)
-        label_list = processor.get_labels()
-        examples = processor.get_examples(args.data_dir, mode)
-        features = convert_examples_to_features(
-            examples,
-            tokenizer,
-            label_list=label_list,
-            max_length=args.max_seq_length,
-            pad_on_left=bool(args.model_type in ["xlnet"]),
-            # pad on the left for xlnet
-            pad_token=tokenizer.pad_token,
-            pad_token_id=tokenizer.pad_token_id,
-            pad_token_segment_id=4 if args.model_type in ["xlnet"] else 0,
-        )
-        if args.local_rank in [-1, 0]:
-            logger.info("Saving features into cached file %s", cached_features_file)
-            torch.save(features, cached_features_file)
 
-    if args.local_rank == 0 and mode == "train":
-        torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
+    label_list = processor.get_labels()
+    examples = processor.get_examples(args.data_dir, mode)
+    features = convert_examples_to_features(
+        examples,
+        tokenizer,
+        label_list=label_list,
+        max_length=args.max_seq_length,
+        pad_on_left=bool(args.model_type in ["xlnet"]),
+        # pad on the left for xlnet
+        pad_token=tokenizer.pad_token,
+        pad_token_id=tokenizer.pad_token_id,
+        pad_token_segment_id=4 if args.model_type in ["xlnet"] else 0,
+    )
+
 
     # Convert to Tensors and build dataset
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
     all_bboxes = torch.tensor([f.bboxes for f in features], dtype=torch.long)
-    all_attention_mask = torch.tensor(
-        [f.attention_mask for f in features], dtype=torch.long
-    )
-    all_token_type_ids = torch.tensor(
-        [f.token_type_ids for f in features], dtype=torch.long
-    )
+    all_attention_mask = torch.tensor([f.attention_mask for f in features], dtype=torch.long)
+    all_token_type_ids = torch.tensor([f.token_type_ids for f in features], dtype=torch.long)
 
     all_labels = torch.tensor([f.label for f in features], dtype=torch.long)
-    dataset = TensorDataset(
-        all_input_ids, all_attention_mask, all_token_type_ids, all_labels, all_bboxes
-    )
+    dataset = TensorDataset(all_input_ids, all_attention_mask, all_token_type_ids, all_labels, all_bboxes)
     return dataset
 
 

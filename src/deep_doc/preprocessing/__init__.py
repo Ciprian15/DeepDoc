@@ -1,0 +1,1 @@
+from  deep_doc.preprocessing import hOCR_processor
