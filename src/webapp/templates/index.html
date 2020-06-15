@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="../static/js/index.js"></script>
+    <script src="../static/js/event_handlers.js"></script>
+    <link rel="stylesheet" href="../static/css/style.css" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.js"></script>
+
+  </head>
+  <body>
+  <div class="control-header">
+      some kind of header
+  </div>
+    <div class ="flex-container">
+      <aside class="sidebar control-panel">
+        <header>
+          Menu
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-flyout">
+            <li >
+              <a href="#">
+                Show labeled data
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                Download labeled data
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                Train model
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                Run inferences
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                Show inference confidence
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                Download inferences
+              </a>
+            </li>
+
+          </ul>
+          </nav>
+      </aside>
+
+      <div class='projection-panel'>
+
+      </div>
+      <div class="image-panel">
+        <nav class="image-actions">
+            <div class="action-element label-dropdown">
+                <div>
+                  Label
+                  <i class="fa fa-caret-down"></i>
+                  </div>
+                <ul class="drop-down-boxes" id="labeling_options">
+                </ul>
+            </div>
+
+            <form class="action-element create-label">
+              <input type='text' placeholder="define new label" class="action-element create-label-textbox" id="new_label_input">
+              </input>
+              <button>
+                  <i class="fa fa-plus" onclick="register_new_label()"></i>
+              </button>
+            </form>
+
+
+            <div class="action-element ignore-images-button">
+
+            </div>
+        </nav>
+
+        <div class="image_container">
+        </div>
+
+        <div class="image_grid">
+        </div>
+      </div>
+
+      <div class="model-panel slim-panel">
+      </div>
+    </div>
+  <footer>
+    Some kind of footer
+  </footer>
+    </body>
+
+</html>

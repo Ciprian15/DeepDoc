@@ -1,0 +1,230 @@
+
+:root{
+    --control-width:10vw;
+    --control-min-width:180px;
+    --height:80vh;
+    --image-width:35%;
+    --header-height:7vh;
+    --background-color:#19222a;
+    --actions-height:30px;
+    --font-size:15px;
+    --text-color:rgba(255,255,255,0.9);
+    --highlight-color:#09f;
+    --action-background-color:lightsteelblue;
+}
+
+body{
+    margin:0;
+    padding:0;
+    border:0;
+    width:100vw;
+    height:100vh;
+}
+
+.flex-container{
+    width:100%;
+    display:flex;
+    flex-direction: row;
+    height:var(--height)
+}
+
+.control-header{
+    width:100vw;
+    background-color:var(--background-color);
+    height:var(--header-height);
+}
+.sidebar{
+    min-width: var(--control-min-width);
+    width: var(--control-width);
+    background-color: var(--action-background-color);
+
+}
+.sidebar header{
+        background-color:var(--highlight-color);
+        width: 100%;
+        height:var(--actions-height);
+        color: var(--text-color);
+        padding:5px;
+        display:block;
+        font-weight: bold;
+        box-sizing: border-box;
+        text-align: center;
+        border: 0;
+        margin:0;
+}
+.nav-flyout{
+    list-style:none;
+    padding: 0;
+    margin: 0;
+    display:flex;
+    flex-direction: column;
+}
+
+.nav-flyout li:hover{
+    background-color: var(--highlight-color);
+    @include transition(all 0.6s ease);
+}
+
+.nav-flyout li{
+    margin-left: 0;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left:0.5vw;
+}
+
+.nav-flyout li a{
+    text-decoration: none;
+    color: var(--text-color);
+    margin-left: 0;
+    text-align: left;
+    font-size: var(--font-size);
+}
+
+
+.projection-panel{
+    background-color:green;
+    flex-grow: 1;
+}
+
+.image-panel{
+    width: calc(var(--height) - var(--actions-height)); /*Form a square*/
+    height:100%;
+    background-color: var(--background-color);
+    display:flex;
+    flex-direction: column;
+}
+
+.image_container{
+    width:100%;
+    height:calc(100% - var(--actions-height));
+    flex-shrink: 1;
+}
+
+.image_container img{
+    max-width:100%;
+    max-height:100%;
+}
+
+.image_grid {
+    width:100%;
+    height:calc(100% - var(--actions-height));
+    overflow-y:scroll;
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-shrink: 1;
+}
+
+.image_grid img{
+    max-width:30%;
+    max-height:30%;
+    padding:0px;
+    border:5px solid var(--action-background-color);
+    margin:5px;
+}
+
+.image-actions{
+    width:100%;
+    height:var(--actions-height);
+    flex-shrink: 0;
+    display:flex;
+    flex-direction: row;
+    background-color: var(--action-background-color);
+}
+.action-element{
+    height:100%;
+    padding:0;
+    margin:0;
+    color: var(--text-color);
+    --font--size: var(--font-size);
+    background-color: inherit;
+}
+
+.label-dropdown {
+    width: 100px;
+    position:relative;
+    height:100%;
+    margin:0;
+    padding: 0;
+    border:0;
+    text-align: center;
+    color: var(--text-color);
+    box-sizing: border-box;
+    background-color: inherit;
+}
+
+.label-dropdown div{
+    height:100%;
+    box-sizing: border-box;
+    padding:calc(1/2 * (var(--actions-height) - var(--font--size) ));
+    font-size: var(--font--size);
+}
+
+.drop-down-boxes{
+    width: inherit;
+    position: absolute;
+    margin:0;
+    border:0;
+    padding:0;
+    max-height:100px;
+    overflow-y:auto;
+    visibility:hidden;
+    color:inherit;
+    background-color: inherit;
+}
+
+.drop-down-boxes .label-name {
+    margin:0;
+    border:0;
+    padding:0;
+    height:100%;
+    width:100%;
+    color:var(--text-color);
+    font-size: var(--font--size);
+}
+
+.label-dropdown:hover .drop-down-boxes {
+    visibility: visible;
+}
+.drop-down-boxes:hover {
+    visibility: visible;
+}
+
+.label-name:hover {
+    background-color:var(--highlight-color);
+}
+
+.create-label{
+    box-sizing:border-box;
+    height:100%;
+    padding:calc(1/2 * (var(--actions-height) - var(--font--size) ));
+
+}
+.create-label input{
+    outline:none;
+    width:150px;
+    box-sizing: border-box;
+    height:100%;
+    font-size: var(--font--size);
+    border: 0;
+    margin:0;
+    padding:0;
+    background-color: inherit;
+}
+.create-label button{
+    color:var(--text-color);
+    font-size: var(--font--size);
+    border: 0;
+    margin:0;
+    padding:0;
+    height:100%;
+    background-color: inherit;
+}
+
+
+footer{
+    width:100vw;
+    background-color:var(--background-color);
+    height:calc(100vh - var(--height) - var(--header-height));
+}
