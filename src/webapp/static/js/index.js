@@ -2,6 +2,7 @@ function load_projection_panel(params){
     const proj_panel = $('.projection-panel');
     params["height"] = proj_panel[0].clientHeight-5;
     params["width"]  = proj_panel[0].clientWidth-5;
+
     proj_panel.load("visualisation",
                     params,
                     function(response){
@@ -11,6 +12,7 @@ function load_projection_panel(params){
 
 function populate_labeling_options(){
     $.get("get_labels",function(labels){
+        $('#labeling_options')[0].innerHTML = "";
         console.log(labels)
         labels.forEach(function(label){
             add_labeling_option(label);

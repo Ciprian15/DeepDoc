@@ -15,52 +15,19 @@
       some kind of header
   </div>
     <div class ="flex-container">
-      <aside class="sidebar control-panel">
-        <header>
-          Menu
-        </header>
-        <nav class="sidebar-nav">
-          <ul class="nav-flyout">
-            <li >
-              <a href="#">
-                Show labeled data
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                Download labeled data
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                Train model
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                Run inferences
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                Show inference confidence
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                Download inferences
-              </a>
-            </li>
-
-          </ul>
-          </nav>
-      </aside>
-
-      <div class='projection-panel'>
-
-      </div>
       <div class="image-panel">
         <nav class="image-actions">
+
+            <!--
+            <form class="action-element search-bar">
+              <input type='text' placeholder="keyword search" class="action-element" id="search">
+              </input>
+              <button>
+                  <i class="fa fa-search" onclick="search_documents()"></i>
+              </button>
+            </form>
+            -->
+
             <div class="action-element label-dropdown">
                 <div>
                   Label
@@ -71,13 +38,25 @@
             </div>
 
             <form class="action-element create-label">
-              <input type='text' placeholder="define new label" class="action-element create-label-textbox" id="new_label_input">
+              <input type='text' placeholder="define new label" class="action-element" id="new_label_input">
               </input>
               <button>
                   <i class="fa fa-plus" onclick="register_new_label()"></i>
               </button>
             </form>
 
+            <div class="action-element action-button">
+                <button onclick="train_new_model()">
+                  Train new model
+                  <i class="fa fa-lightbulb-o"></i>
+                  </button>
+            </div>
+            <div class="action-element action-button">
+                <button onclick="download_predictions()">
+                  Download
+                  <i class="fa fa-download"></i>
+                  </button>
+            </div>
 
             <div class="action-element ignore-images-button">
 
@@ -90,9 +69,9 @@
         <div class="image_grid">
         </div>
       </div>
-
-      <div class="model-panel slim-panel">
+      <div class='projection-panel'>
       </div>
+
     </div>
   <footer>
     Some kind of footer

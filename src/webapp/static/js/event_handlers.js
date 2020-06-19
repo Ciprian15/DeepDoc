@@ -31,8 +31,6 @@ function handle_select(source,cb_obj){
     display_documents(documents)
 }
 
-
-
 function create_document_element(size,document_name){
     var source = "documents/"+size+"/"+document_name+".jpg"
 
@@ -43,7 +41,7 @@ function display_documents(document_names){
     selection = {}
     var document_elements = [];
     document_names.forEach(function(doc_name){
-        document_elements.push(create_document_element("small",doc_name))
+        document_elements.push(create_document_element("medium",doc_name))
     })
 
     img_container = $('.image_container')
@@ -105,7 +103,24 @@ function label_document(label_element){
                 alert("Could not register label/s");
             },
             200: function () {
-                alert("Label/s registered")
+                populate_labeling_options()
+            }
+        }
+    })
+}
+
+
+
+function train_new_model(){
+    $.ajax({"url":"train_model",
+        method:"GET",
+        statusCode: {
+            400: function () {
+                alert("Could not train new model");
+            },
+            200: function () {
+                load_projection_panel({});
+                alert("Model trained")
             }
         }
     })

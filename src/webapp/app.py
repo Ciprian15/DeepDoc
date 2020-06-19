@@ -1,61 +1,26 @@
 from flask import render_template, Flask,send_file,request,jsonify
 
-
-from bokeh.plotting import figure
-from bokeh.resources import CDN
-from bokeh.models.sources import ColumnDataSource
-from bokeh.models import HoverTool,RangeSlider
-from bokeh.events import Tap
-from bokeh.models.callbacks import CustomJS
-from bokeh.embed import file_html
-from bokeh.palettes import  Turbo256
-from bokeh.layouts import column
-
 from webapp import data
 from webapp import model
+from webapp import visualisation as visual
 import os
-
+import numpy as np
+import pandas as pd
 app = Flask(__name__)
 
 DATASET = 'SMALL_TOBACCO'
 DOCUMENTS_DIRECTORY = "data/{}".format(DATASET)
 
-
 @app.route('/')
 def default():
     return render_template("index.html")
 
-
-def make_plot(doc_data_raw,width,height):
-    doc_data = ColumnDataSource(doc_data_raw)
-
-    TOOLS = "pan,wheel_zoom,reset,box_select"
-
-    plot = figure(plot_width=width,
-                  plot_height=height,
-                  tools=TOOLS)
-    plot.scatter(x='x',
-                 y='y',
-                 color= 'color' if 'color' in doc_data_raw.columns else 'darkblue',
-                 source=doc_data,
-                 legend='labels' if 'labels' in doc_data_raw.columns else None
-                 )
-
-    plot.toolbar.__setattr__('logo', None)
-
-    on_tap_callback = CustomJS(args=dict(source=doc_data), code="handle_tap(source,cb_obj)")
-    plot.js_on_event(Tap, on_tap_callback)
-
-    on_select_callback = CustomJS(args=dict(source=doc_data), code="handle_select(source,cb_obj)")
-    doc_data.selected.js_on_change('indices', on_select_callback)
-    return plot
-
 @app.route('/visualisation',methods=['POST'])
 def visualisation():
-    plot = make_plot(data.load.get_document_projections(DATASET),
-                     int(request.form['width']),
-                     int(request.form['height']))
-    return file_html(plot,CDN,"Document projections")
+    doc_data = data.load.get_document_data(DATASET)
+    return visual.bokeh_visuals.get_plots(doc_data,
+                                          int(request.form['height']),
+                                          int(request.form['width']))
 
 @app.route('/ping')
 def ping():
@@ -64,6 +29,10 @@ def ping():
 @app.route('/documents/<size>/<filename>')
 def documents(size,filename):
     return send_file("{}/{}/document_images_{}/{}".format(os.getcwd(),DOCUMENTS_DIRECTORY,size,filename),mimetype='image/jpeg')
+
+@app.route('/documents/bbox/<filename>')
+def text_extraction_result(filename):
+    return send_file("{}/{}/document_bboxes/{}".format(os.getcwd(),DOCUMENTS_DIRECTORY,filename),mimetype='image/jpeg')
 
 @app.route('/register_label',methods=['POST'])
 def register_label():
@@ -85,47 +54,32 @@ def label_documents():
     except Exception as e:
         return str(e),400
 
+
 @app.route('/train_model', methods=['GET'])
 def train_model():
-    import pandas as pd
-    import numpy as np
-    docs,labels = data.load.prepare_labeled_data(DATASET)
-    clf, label_encoder = model.train.train_model(docs, labels, DATASET)
-    docs, inferences, labels = model.inference.perform_inferences(clf, label_encoder, DATASET)
+    try:
+        docs,labels = data.load.prepare_labeled_data(DATASET)
 
-    predictions_confidence = np.max(inferences,axis=1)
-    model_results = pd.DataFrame({"documents":docs,
-                                  "prediction_confidence":predictions_confidence,
-                                  "labels":labels})
+        ground_truth_data = pd.DataFrame({"documents":docs,"label":labels})
+        clf, label_encoder = model.train.train_model(docs, labels, DATASET)
+        docs, probabilities, predictions = model.inference.perform_inferences(clf, label_encoder, DATASET)
 
-
-    known_colors = Turbo256
-    num_distinct_labels = len(set(labels))
-    color_map = {}
-    for ix,label in enumerate(set(labels)):
-        color_map[label] = known_colors[ix*int(len(known_colors)/(num_distinct_labels))]
-
-    doc_data = data.load.get_document_projections(DATASET)
-    doc_data = doc_data.join(model_results.set_index("documents"),on=("documents"),how='inner')
-    doc_data['color'] = doc_data['labels'].apply(lambda label: color_map[label])
+        predictions_confidence = np.max(probabilities,axis=1)
+        model_results = pd.DataFrame({"documents":docs,
+                                      "prediction_confidence":predictions_confidence,
+                                      "prediction":predictions})
 
 
-    plot = make_plot(doc_data,1000,1000)
-    plot.legend.location = 'bottom_left'
+        model_results = model_results.join(ground_truth_data.set_index('documents'),
+                                           on=('documents'),
+                                           how='left')\
+                                     .fillna("unlabeled")
 
-    plot.add_tools(HoverTool(tooltips=[("Name", "@documents"),
-                                       ("Label", "@labels"),
-                                       ("Confidence", "@prediction_confidence")]))
-
-    #on_range_callback = CustomJS(args=dict(),code="console.log('slider changed'")
-    #slider = RangeSlider(start=0, end=1, step=0.01,title='Slider')
-    #slider.js_on_change('range', on_range_callback)
-
-    #layout = column(plot, slider)
-
-    return file_html(plot,CDN,"Document projections")
-
-
+        data.update.update_predictions(model_results,DATASET)
+        return "Model trained",200
+    except Exception as e:
+        print(e);
+        return str(e),400
 
 if __name__ == '__main__':
     app.run(debug=True,port=8889,host='0.0.0.0')

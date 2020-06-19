@@ -82,7 +82,7 @@ body{
 
 
 .projection-panel{
-    background-color:green;
+    background-color:var(--action-background-color);
     flex-grow: 1;
 }
 
@@ -117,8 +117,8 @@ body{
 }
 
 .image_grid img{
-    max-width:30%;
-    max-height:30%;
+    max-width:45%;
+    max-height:45%;
     padding:0px;
     border:5px solid var(--action-background-color);
     margin:5px;
@@ -135,11 +135,16 @@ body{
 .action-element{
     height:100%;
     padding:0;
-    margin:0;
+    margin:0 5px;
     color: var(--text-color);
     --font--size: var(--font-size);
     background-color: inherit;
 }
+
+/*.action-element:hover{
+    color: dimgray;
+    background-color: floralwhite;
+}*/
 
 .label-dropdown {
     width: 100px;
@@ -199,8 +204,33 @@ body{
     box-sizing:border-box;
     height:100%;
     padding:calc(1/2 * (var(--actions-height) - var(--font--size) ));
-
 }
+
+
+.search-bar input{
+    outline:none;
+    width:150px;
+    box-sizing: border-box;
+    height:100%;
+    font-size: var(--font--size);
+    border: 0;
+    margin:0;
+    padding:0;
+    background-color: inherit;
+}
+
+.search-bar button{
+    color:var(--text-color);
+    font-size: var(--font--size);
+    border: 0;
+    margin:0;
+    padding:0;
+    height:100%;
+    background-color: inherit;
+}
+
+
+
 .create-label input{
     outline:none;
     width:150px;
@@ -221,6 +251,19 @@ body{
     height:100%;
     background-color: inherit;
 }
+
+
+
+.action-button button{
+    color:var(--text-color);
+    font-size: var(--font--size);
+    border: 0;
+    margin:0;
+    padding:0;
+    height:100%;
+    background-color: inherit;
+}
+
 
 
 footer{
