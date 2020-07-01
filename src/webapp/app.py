@@ -30,6 +30,12 @@ def ping():
 def documents(size,filename):
     return send_file("{}/{}/document_images_{}/{}".format(os.getcwd(),DOCUMENTS_DIRECTORY,size,filename),mimetype='image/jpeg')
 
+
+@app.route('/download_predictions', methods=['GET'])
+def download():
+    return send_file("{}/{}/document_predictions.csv".format(os.getcwd(),DOCUMENTS_DIRECTORY,))
+
+
 @app.route('/documents/bbox/<filename>')
 def text_extraction_result(filename):
     return send_file("{}/{}/document_bboxes/{}".format(os.getcwd(),DOCUMENTS_DIRECTORY,filename),mimetype='image/jpeg')
@@ -60,17 +66,19 @@ def train_model():
     try:
         docs,labels = data.load.prepare_labeled_data(DATASET)
 
-        ground_truth_data = pd.DataFrame({"documents":docs,"label":labels})
+        training_data = pd.DataFrame({"documents":docs,"label":labels})
         clf, label_encoder = model.train.train_model(docs, labels, DATASET)
         docs, probabilities, predictions = model.inference.perform_inferences(clf, label_encoder, DATASET)
 
         predictions_confidence = np.max(probabilities,axis=1)
+
+
         model_results = pd.DataFrame({"documents":docs,
                                       "prediction_confidence":predictions_confidence,
                                       "prediction":predictions})
 
 
-        model_results = model_results.join(ground_truth_data.set_index('documents'),
+        model_results = model_results.join(training_data.set_index('documents'),
                                            on=('documents'),
                                            how='left')\
                                      .fillna("unlabeled")

@@ -25,9 +25,32 @@ function handle_tap(source,cb_obj){
 function handle_select(source,cb_obj){
     var documents = [];
     var inds = cb_obj.indices;
-    for (var i = 0; i < inds.length; i++) {
+
+
+    var got_confidence = 'prediction_confidence' in source['data'];
+    if (!got_confidence) {
+        for (var i = 0; i < inds.length; i++) {
             documents.push(source['data']['documents'][inds[i]])
+        }
+    }else{
+        var aux = []
+        for (var i = 0; i < inds.length; i++) {
+            aux.push([source['data']['documents'][inds[i]],
+                      source['data']['prediction_confidence'][inds[i]]])
+        }
+
+        aux.sort(function(first, second) {
+              return first[1] - second[1];
+        });
+
+        console.log(aux);
+
+        documents = aux.map(function(x){ return x[0]})
+
+        console.log(documents);
+
     }
+
     display_documents(documents)
 }
 

@@ -24,6 +24,7 @@ def get_document_data(dataset_name):
         predictions = get_document_predictions(dataset_name)
         data = data.join(predictions.set_index('documents'),on=('documents'),how='inner')
     except Exception as e:
+        print(e)
         pass
 
     return data

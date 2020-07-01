@@ -15,9 +15,12 @@ from bokeh.models import ColorBar
 
 UNLABELED_COLOR= '#666666'
 
+SIZE = 5
+
+
 def raw_visualisation(doc_data,height,width):
     doc_data = ColumnDataSource(doc_data)
-    TOOLS = "pan,wheel_zoom,reset,box_select"
+    TOOLS = "pan,box_zoom,reset,box_select"
 
     plot = figure(plot_width=width,
                   plot_height=height,
@@ -25,20 +28,20 @@ def raw_visualisation(doc_data,height,width):
     plot.scatter(x='x',
                  y='y',
                  source=doc_data,
-                 color=UNLABELED_COLOR)
+                 color=UNLABELED_COLOR,
+                 size=SIZE)
 
     plot.js_on_event(Tap, CustomJS(args=dict(source=doc_data),
                                    code="handle_tap(source,cb_obj)"))
     doc_data.selected.js_on_change('indices', CustomJS(args=dict(source=doc_data),
                                                        code="handle_select(source,cb_obj)"))
-
     return plot
 
 def labels_plot(doc_data,height,width,target_column,color_map):
     doc_data['color'] = doc_data[target_column].apply(lambda label: color_map[label])
     doc_data['alpha'] = doc_data[target_column].apply(lambda label: 0.1 if (label=='unlabeled' and target_column=='label') else 1)
 
-    TOOLS = "pan,wheel_zoom,reset,box_select"
+    TOOLS = "pan,box_zoom,reset,box_select"
 
     plot = figure(plot_width=width,
                   plot_height=height,
@@ -56,11 +59,10 @@ def labels_plot(doc_data,height,width,target_column,color_map):
 
 
     if text_info:
-        print(text_info);
         text_info_box = Label(x=int(width / 2), y=10, text=text_info,render_mode='css',
-                 border_line_color='black', border_line_alpha=1.0,
-                 background_fill_color='white', background_fill_alpha=1.0,
-                 x_units='screen', y_units='screen')
+                     border_line_color='black', border_line_alpha=1.0,
+                     background_fill_color='white', background_fill_alpha=1.0,
+                     x_units='screen', y_units='screen')
         plot.add_layout(text_info_box)
 
 
@@ -77,7 +79,8 @@ def labels_plot(doc_data,height,width,target_column,color_map):
                  color='color',
                  alpha='alpha',
                  source=doc_data,
-                 legend=target_column
+                 legend=target_column,
+                 size=SIZE
                  )
 
 
@@ -98,7 +101,7 @@ def confidence_plot(doc_data,height,width):
 
     doc_data = ColumnDataSource(doc_data)
 
-    TOOLS = "pan,wheel_zoom,reset,box_select"
+    TOOLS = "pan,box_zoom,reset,box_select"
 
     plot = figure(plot_width=width,
                   plot_height=height,
@@ -112,13 +115,13 @@ def confidence_plot(doc_data,height,width):
     exp_cmap = LinearColorMapper(palette='Magma256',
                                  low=min_confidence,
                                  high=max_confidence)
-
     plot.scatter(x='x',
                  y='y',
                  fill_color={
                             "field":'prediction_confidence',
                              'transform': exp_cmap
                             },
+                 size=SIZE,
                  source=doc_data,
                  )
 
@@ -136,8 +139,6 @@ def confidence_plot(doc_data,height,width):
 
 
 def get_plots(doc_data,height,width):
-    print(doc_data.columns)
-
     TAB_HEIGHT = 30
 
     tabs = []
@@ -159,13 +160,7 @@ def get_plots(doc_data,height,width):
         for ix, label in enumerate(reference_labels):
             color_map[label] = known_colors[ix * int(len(known_colors) / (len(reference_labels)))]
 
-    if 'real label' in doc_data.columns:
-        tabs.append(Panel(child=labels_plot(doc_data,
-                                            height - TAB_HEIGHT,
-                                            width,
-                                            'real label',
-                                            color_map),
-                          title="Ground truth"))
+
 
     if 'label' in doc_data.columns:
         tabs.append(Panel(child=labels_plot(doc_data,
@@ -196,6 +191,15 @@ def get_plots(doc_data,height,width):
                                             'errors',
                                             {"error":"red","corect":"green"}),
                           title='Model Errors'))
+
+    if 'real label' in doc_data.columns:
+        tabs.append(Panel(child=labels_plot(doc_data,
+                                            height - TAB_HEIGHT,
+                                            width,
+                                            'real label',
+                                            color_map),
+                          title="Ground truth"))
+
 
     tabs = Tabs(tabs=tabs)
 
